@@ -11,7 +11,8 @@ export type storyPoint = {
     history: [],
     files: [],
     company_id: dbID,
-    created_by: dbID
+    created_by: dbID,
+    id: dbID,
 }
 
 export type user = {
