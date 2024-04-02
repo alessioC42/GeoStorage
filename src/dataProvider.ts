@@ -133,7 +133,7 @@ export class DataProvider {
 
     async searchStoryPointsRemote(query: string): Promise<storyPoint[]> {
         try {
-            const response = await this.fetch(`${this.baseURL}/api/company/${this.companyID}/storypoints/search?q=${query}`,  {method: 'GET'});
+            const response = await this.fetch(`${this.baseURL}/api/company/${this.companyID}/storypoints/search?q=${query}`);
             if (response.status == 200) {
                 return (await response.json())["storypoints"].map((item: any) => item.item);
             } else {
@@ -142,6 +142,20 @@ export class DataProvider {
         } catch (e) {
             console.error(e);
             return [];
+        }
+    }
+
+    async getEntireStoryPoint(id: string): Promise<storyPoint | null> {
+        try {
+            const response = await this.fetch(`${this.baseURL}/api/company/${this.companyID}/storypoints/${id}`);
+            if (response.status == 200) {
+                return (await response.json())["storypoint"] as storyPoint;
+            } else {
+                return null;
+            }
+        } catch (e) {
+            console.error(e);
+            return null;
         }
     }
 }
