@@ -1,17 +1,23 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import type {OsmSearchResult} from "@/types";
-import OSMSearchResult from './OSMSearchResult.vue';
+import type {OsmSearchResult, storyPoint} from "@/types";
+import OSMSearchResult from './listTiles/OSMSearchResult.vue';
+import {DataProvider} from "@/dataProvider";
+import StoryPointSearchResult from "@/components/listTiles/StoryPointSearchResult.vue";
 
 async function openStreetMapSearch(query: string) : Promise<OsmSearchResult[]> {
   const result = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=jsonv2&addressdetails=1&layer=address&limit=15`);
   return result.json();
 }
 
+async function storyPointSearch(query: string) : Promise<storyPoint[]> {
+  return DataProvider.getInstance().searchStoryPointsRemote(query);
+}
+
 let searchTimeout: number | null ;
 export default defineComponent({
   name: "Search",
-  components: {OSMSearchResult},
+  components: {StoryPointSearchResult, OSMSearchResult},
   props: {
     searchQuery: {
       type: String,
@@ -31,6 +37,7 @@ export default defineComponent({
     return {
       tab: 'storyPoints',
       osmSearchResults: [] as OsmSearchResult[],
+      storyPointRemoteResults: [] as storyPoint[],
       localSearchQuery: this.searchQuery,
     }
   },
@@ -43,7 +50,8 @@ export default defineComponent({
     performSearch() {
       if (searchTimeout) clearTimeout(searchTimeout);
       searchTimeout = setTimeout(async () => {
-        this.osmSearchResults = await openStreetMapSearch(this.localSearchQuery) as OsmSearchResult[];
+        this.osmSearchResults = await openStreetMapSearch(this.localSearchQuery);
+        this.storyPointRemoteResults = await storyPointSearch(this.localSearchQuery);
       }, 400);
     },
   }
@@ -66,6 +74,17 @@ export default defineComponent({
       <v-card-text>
         <v-window v-model="tab">
           <v-window-item value="storyPoints">
+            <v-virtual-scroll
+                :items="storyPointRemoteResults"
+                :item-height="48"
+                style="height: 45vh;"
+            >
+              <template v-slot="{ item }">
+                <StoryPointSearchResult
+                    :story-point="item"
+                    :on-press="console.log"  />
+              </template>
+            </v-virtual-scroll>
           </v-window-item>
 
           <v-window-item value="openStreetMap">

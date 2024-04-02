@@ -130,4 +130,18 @@ export class DataProvider {
             return "an unexpected error occurred while creating the story point!";
         }
     }
+
+    async searchStoryPointsRemote(query: string): Promise<storyPoint[]> {
+        try {
+            const response = await this.fetch(`${this.baseURL}/api/company/${this.companyID}/storypoints/search?q=${query}`,  {method: 'GET'});
+            if (response.status == 200) {
+                return (await response.json())["storypoints"].map((item: any) => item.item);
+            } else {
+                return [];
+            }
+        } catch (e) {
+            console.error(e);
+            return [];
+        }
+    }
 }
