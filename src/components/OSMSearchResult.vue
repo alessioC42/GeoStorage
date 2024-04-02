@@ -14,8 +14,8 @@ const props = defineProps<{
   <v-list-item
       @click="(_) => {props.onPress(props.osmSearchResult);}"
   >
-    <v-list-item-title>{{ osmSearchResult.address?.house_number }} {{osmSearchResult.address?.road}} {{osmSearchResult.address?.city}}</v-list-item-title>
-    <v-list-item-subtitle>{{ osmSearchResult.category }}</v-list-item-subtitle>
+    <v-list-item-title>{{ osmSearchResult.display_name }}</v-list-item-title>
+    <v-list-item-subtitle>{{ osmSearchResult.category }} {{osmSearchResult.type}}</v-list-item-subtitle>
   </v-list-item>
 </template>
 

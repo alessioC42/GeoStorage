@@ -1,9 +1,9 @@
 import type {LatLngTuple} from 'leaflet';
 
-export type dbID = string | number;
+export type dbID = string;
 export type unixTimestamp = number;
 
-export type StoryPoint = {
+export type storyPoint = {
     coords: LatLngTuple,
     title: string,
     description: string,
@@ -18,7 +18,7 @@ export type user = {
     id: dbID,
     fullname: string,
     email: string,
-    company_id: dbID
+    company_id: dbID,
 }
 
 export type company = {
@@ -36,6 +36,7 @@ export interface OsmSearchResult {
     osm_id: number;
     lat: string;
     lon: string;
+    town?: string;
     category: string;
     type: string;
     place_rank: number;
@@ -46,6 +47,7 @@ export interface OsmSearchResult {
         road?: string;
         hamlet?: string;
         suburb?: string;
+        town?: string;
         city?: string;
         state?: string;
         "ISO3166-2-lvl4"?: string;

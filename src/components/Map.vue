@@ -2,7 +2,7 @@
 import { watch } from 'vue';
 import type {LatLng, LatLngBounds, LatLngTuple, LeafletMouseEvent} from 'leaflet';
 import type { ViewChangedEvent } from 'vue-use-leaflet';
-import type { StoryPoint } from '@/types';
+import type { storyPoint } from '@/types';
 import {
   VMap, VMapAttributionControl, VMapGoogleTileLayer,
   VMapLayersControl, VMapMarker,
@@ -10,9 +10,9 @@ import {
 } from "vue-map-ui";
 import {ref, onMounted} from "vue";
 import IconStoryPoint from "@/components/icons/IconStoryPoint.vue";
+import {DataProvider} from "@/dataProvider";
 
 const props = defineProps<{
-  markers: StoryPoint[],
   onMapClick: Function,
   onMarkerClick: Function,
   searchMarkerLocation: LatLng | null,
@@ -42,7 +42,7 @@ function onMapClicked(e: LeafletMouseEvent) {
   props.onMapClick(e);
 }
 
-function onMarkerClicked(e: LeafletMouseEvent, marker: StoryPoint) {
+function onMarkerClicked(e: LeafletMouseEvent, marker: storyPoint) {
   props.onMarkerClick(e, marker);
 }
 
@@ -69,7 +69,7 @@ onMounted(() => {
     <VMapScaleControl />
 
     <VMapAttributionControl />
-    <VMapMarker v-for="(marker, index) in props.markers" :key="index" :latlng="marker.coords" @click="onMarkerClicked($event, marker)">
+    <VMapMarker v-for="(marker, index) in DataProvider.getInstance().stories.value" :key="index" :latlng="marker.coords" @click="onMarkerClicked($event, marker)">
       <VMapPinIcon>
         <icon-story-point />
       </VMapPinIcon>

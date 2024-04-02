@@ -1,5 +1,6 @@
-import type {user} from "@/types";
+import type {storyPoint, user} from "@/types";
 import {type Ref, ref} from "vue";
+import type {LatLngTuple} from "leaflet";
 
 export class DataProvider {
     private static instance: DataProvider;
@@ -7,8 +8,10 @@ export class DataProvider {
     userData = {
         fullname: ref<string>(""),
         email: ref<string>(""),
-    }
+    };
+    companyID: string = "";
     loggedIn: Ref<boolean> = ref(false);
+    stories: Ref<storyPoint[]> = ref([]);
 
     private constructor(baseURL: string) {
         this.baseURL = baseURL;
@@ -45,6 +48,7 @@ export class DataProvider {
     async firstAuthCheck() : Promise<void> {
         if (await this.isAuthenticated()) {
             await this.getUserInformation();
+            await this.getAllStories();
         }
     }
 
@@ -80,10 +84,11 @@ export class DataProvider {
         try {
         const response = await this.fetch(`${this.baseURL}/api/user`);
         if (response.status == 200) {
-            const result: user = await response.json();
+            const result: user = (await response.json())["user"];
             this.userData.fullname.value = result.fullname;
             this.userData.email.value = result.email;
-
+            this.companyID = result.company_id;
+            console.log(result.company_id);
             return result;
         } else {
             return null;
@@ -92,6 +97,37 @@ export class DataProvider {
             this.userData.fullname.value = "";
             this.userData.email.value = "";
             return null;
+        }
+    }
+
+    async getAllStories() : Promise<storyPoint[]> {
+        let response = await this.fetch(`${this.baseURL}/api/company/${this.companyID}/storypoints`);
+        let result: storyPoint[] = (await response.json())["storypoints"];
+        this.stories.value = result;
+        console.log(result);
+        return result;
+    }
+
+    async createStoryPoint(coords: LatLngTuple, title: string, description: string): Promise<string | null> {
+        try {
+            const response = await this.fetch(`${this.baseURL}/api/company/${this.companyID}/storypoints`, {
+                body: JSON.stringify({"storypoint": {title, description, coords} }),
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (response.status == 201) {
+                //now await
+                this.getAllStories();
+                //(await response.json())["storypoint_id"]
+                return null;
+            } else {
+                return response.text();
+            }
+        } catch (e) {
+            console.error(e);
+            return "an unexpected error occurred while creating the story point!";
         }
     }
 }

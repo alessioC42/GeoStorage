@@ -4,7 +4,7 @@
         style="height: 100%; width: 100%;z-index: 0;"
         :markers="markers"
         :onMapClick="onMapClick"
-        :onMarkerClick="(mouseEvent: LeafletMouseEvent, storyPoint: StoryPoint) => {}"
+        :onMarkerClick="(mouseEvent: LeafletMouseEvent, storyPoint: storyPoint) => {}"
         :search-marker-location="searchMarkerLocation as LatLng | null"
     ></Map>
     <div class="map-overlay">
@@ -25,7 +25,7 @@
 <script setup lang="ts">
 import {ref, watch} from 'vue';
 import Map from '@/components/Map.vue'
-import {type OsmSearchResult, type StoryPoint} from "@/types";
+import {type OsmSearchResult, type storyPoint} from "@/types";
 import type {LatLng, LeafletMouseEvent} from "leaflet";
 import Search from "@/components/Search.vue";
 import PlaceDescription from "@/components/PlaceDescription.vue";
@@ -46,7 +46,7 @@ function onMapClick(mouseEvent: LeafletMouseEvent) {
   searchQuery.value = '';
 }
 
-let markers: StoryPoint[] = [];
+let markers: storyPoint[] = [];
 markers.push({
   coords: [50.10743, 8.66447],
   title: "Gar nichts",

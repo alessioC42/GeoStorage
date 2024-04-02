@@ -5,7 +5,6 @@ import OSMSearchResult from './OSMSearchResult.vue';
 
 async function openStreetMapSearch(query: string) : Promise<OsmSearchResult[]> {
   const result = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=jsonv2&addressdetails=1&layer=address&limit=15`);
-  console.log(result);
   return result.json();
 }
 
@@ -70,15 +69,19 @@ export default defineComponent({
           </v-window-item>
 
           <v-window-item value="openStreetMap">
-            <v-list>
-              <OSMSearchResult
-                  v-for="result in osmSearchResults"
-                  :key="result.place_id"
-                  :hidden="result.address?.city === undefined"
-                  :osmSearchResult="result"
-                  :onPress="() => {osmLocationSelected(result)}"
-              ></OSMSearchResult>
-            </v-list>
+            <v-virtual-scroll
+                :items="osmSearchResults"
+                :item-height="48"
+                style="height: 45vh;"
+            >
+              <template v-slot="{ item }">
+                <OSMSearchResult
+                    :key="item.place_id"
+                    :osmSearchResult="item"
+                    :onPress="() => {osmLocationSelected(item)}"
+                ></OSMSearchResult>
+              </template>
+            </v-virtual-scroll>
           </v-window-item>
         </v-window>
       </v-card-text>
@@ -87,6 +90,9 @@ export default defineComponent({
 </template>
 
 <style scoped>
+.virtual-scroll {
+  height: 50vh;
+}
 #sheet {
   padding: 5px;
   border-radius: 5px;

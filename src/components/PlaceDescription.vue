@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { watchEffect, ref } from 'vue';
 import type {OsmSearchResult} from "@/types";
+import {DataProvider} from "@/dataProvider";
 
 let title = 'Place Description';
 let subtitle = 'A description of a place';
 let isLoading = ref(false);
-
+let dialog = ref(false);
+let errorMessage = ref("");
 async function loadPlace() {
   if (props.latLngTuple === null) return;
   isLoading.value = true;
@@ -18,7 +20,6 @@ async function loadPlace() {
 
 const props = defineProps<{
   latLngTuple: [number, number] | null
-  onOpenPlace: Function
 }>();
 
 watchEffect(() => {
@@ -26,6 +27,15 @@ watchEffect(() => {
     loadPlace();
   }
 });
+
+async function createStory() {
+  const error = await DataProvider.getInstance().createStoryPoint(props.latLngTuple!, title, subtitle);
+  if (error) {
+    errorMessage.value = error;
+    dialog.value = true;
+  }
+  isLoading.value = true; // hide element
+}
 
 </script>
 
@@ -36,10 +46,21 @@ watchEffect(() => {
     <v-card-text> </v-card-text>
     <v-card-actions id="actions">
       <v-btn v-if="props.latLngTuple != null" :href="`https://www.google.com/maps/search/?api=1&query=${props.latLngTuple[0]},${props.latLngTuple[1]}`" target="_blank">GOOGLE MAPS</v-btn>
-      <v-btn @click="onOpenPlace">Open</v-btn>
+      <v-btn @click="createStory">create story</v-btn>
     </v-card-actions>
     <v-progress-circular v-if="isLoading" indeterminate></v-progress-circular>
+    <v-dialog v-model="dialog" max-width="290">
+      <v-card>
+        <v-card-title>Error</v-card-title>
+        <v-card-text>{{ errorMessage }}</v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="green darken-1" @click="dialog = false">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-sheet>
+
 </template>
 
 <style scoped>
