@@ -46,7 +46,7 @@ async function createStory() {
     <v-card-text> </v-card-text>
     <v-card-actions id="actions">
       <v-btn v-if="props.latLngTuple != null" :href="`https://www.google.com/maps/search/?api=1&query=${props.latLngTuple[0]},${props.latLngTuple[1]}`" target="_blank">GOOGLE MAPS</v-btn>
-      <v-btn @click="createStory">create story</v-btn>
+      <v-btn @click="createStory">create storypoint</v-btn>
     </v-card-actions>
     <v-progress-circular v-if="isLoading" indeterminate></v-progress-circular>
     <v-dialog v-model="dialog" max-width="290">

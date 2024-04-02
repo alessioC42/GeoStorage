@@ -1,6 +1,5 @@
 <script setup lang="ts">
 
-
 import type {storyPoint} from "@/types";
 
 const props = defineProps<{
@@ -15,7 +14,7 @@ const props = defineProps<{
       @click="(_) => {props.onPress(props.storyPoint);}"
   >
     <v-list-item-title>{{ storyPoint.title }}</v-list-item-title>
-    <v-list-item-subtitle class="clamp-description">{{ storyPoint.description }}</v-list-item-subtitle>
+    <v-list-item-subtitle class="clamp-description">{{ storyPoint.description ?? storyPoint.coords }}</v-list-item-subtitle>
   </v-list-item>
 </template>
 

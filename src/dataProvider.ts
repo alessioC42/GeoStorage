@@ -1,4 +1,4 @@
-import type {storyPoint, user} from "@/types";
+import type {dbID, storyPoint, user} from "@/types";
 import {type Ref, ref} from "vue";
 import type {LatLngTuple} from "leaflet";
 
@@ -135,7 +135,7 @@ export class DataProvider {
         try {
             const response = await this.fetch(`${this.baseURL}/api/company/${this.companyID}/storypoints/search?q=${query}`);
             if (response.status == 200) {
-                return (await response.json())["storypoints"].map((item: any) => item.item);
+                return (await response.json())["storypoints"];
             } else {
                 return [];
             }
@@ -156,6 +156,20 @@ export class DataProvider {
         } catch (e) {
             console.error(e);
             return null;
+        }
+    }
+
+    async updateStoryPoint(id: dbID, title: string, description: string, history: string[]): Promise<void> {
+        try {
+            const response = await this.fetch(`${this.baseURL}/api/company/${this.companyID}/storypoints/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify({storypoint: {title, description, history}}),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+        } catch (e) {
+            console.error(e);
         }
     }
 }

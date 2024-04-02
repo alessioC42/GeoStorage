@@ -27,6 +27,10 @@ export default defineComponent({
       type: Function,
       default: (result: OsmSearchResult | null) => {},
     },
+    openStoryPoint: {
+      type: Function,
+      required: true
+    },
     lastClickedMapLocation: {
       type: Object,
       default: () => ({ lat: 0, lng: 0 }),
@@ -52,6 +56,7 @@ export default defineComponent({
       searchTimeout = setTimeout(async () => {
         this.osmSearchResults = await openStreetMapSearch(this.localSearchQuery);
         this.storyPointRemoteResults = await storyPointSearch(this.localSearchQuery);
+        console.log(this.storyPointRemoteResults)
       }, 400);
     },
   }
@@ -82,7 +87,7 @@ export default defineComponent({
               <template v-slot="{ item }">
                 <StoryPointSearchResult
                     :story-point="item"
-                    :on-press="console.log"  />
+                    :on-press="()=>{openStoryPoint(item)}"  />
               </template>
             </v-virtual-scroll>
           </v-window-item>

@@ -55,10 +55,19 @@ onMounted(() => {
   if (storedZoom) zoom.value = Number(storedZoom);
   if (storedBounds) bounds.value = JSON.parse(storedBounds);
 });
+
+function onMouseDown() {
+  document.getElementById('map')?.style.setProperty('cursor', 'grabbing');
+}
+
+function onMouseUp() {
+  document.getElementById('map')?.style.setProperty('cursor', 'auto');
+}
+
 </script>
 
 <template>
-  <VMap :center="center" :zoom="zoom" @view-changed="onViewChanged" @click="onMapClicked">
+  <VMap id="map" :center="center" :zoom="zoom" @view-changed="onViewChanged" @click="onMapClicked" @mousedown="onMouseDown" @mouseup="onMouseUp">
     <VMapLayersControl>
       <VMapOsmTileLayer title="OpenStreetMap" />
       <VMapGoogleTileLayer title="G Streets" />
@@ -71,10 +80,22 @@ onMounted(() => {
     <VMapAttributionControl />
     <VMapMarker v-for="(marker, index) in DataProvider.getInstance().stories.value" :key="index" :latlng="marker.coords" @click="onMarkerClicked($event, marker)">
       <VMapPinIcon>
-        <icon-story-point />
+        <v-icon>mdi-format-list-bulleted-type</v-icon>
       </VMapPinIcon>
     </VMapMarker>
 
     <!--search Marker-->
-    <VMapMarker v-if="searchMarkerLocation" :latlng="searchMarkerLocation"></VMapMarker>  </VMap>
+    <VMapMarker v-if="searchMarkerLocation" :latlng="searchMarkerLocation">
+      <VMapPinIcon background-color="red">
+        <v-icon>mdi-cursor-default-click</v-icon>
+      </VMapPinIcon>
+    </VMapMarker>
+  </VMap>
 </template>
+
+<style scoped>
+#map {
+
+
+}
+</style>

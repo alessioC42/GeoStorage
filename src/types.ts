@@ -7,12 +7,18 @@ export type storyPoint = {
     coords: LatLngTuple,
     title: string,
     description: string,
-    images: [],
-    history: [],
+    history: historyItem[],
     files: [],
     company_id: dbID,
     created_by: dbID,
     id: dbID,
+}
+
+export type historyItem = {
+    created_at: unixTimestamp,
+    user_id: dbID,
+    user_fullname: string;
+    text: string,
 }
 
 export type user = {

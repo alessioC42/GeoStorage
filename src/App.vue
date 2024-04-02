@@ -10,7 +10,7 @@
       <Search
           :search-query="searchQuery"
           :osm-location-selected="updateSearchMarkerLocation"
-      />
+          :open-story-point="onStorySelected"/>
     </div>
     <div class="map-overlay">
       <PlaceDescription id="placeDesc" :lat-lng-tuple="searchMarkerLocation" :on-open-place="()=> {}" />
@@ -80,7 +80,7 @@ function onStorySelected(storyPoint: storyPoint) {
   width: 100%;
   height: 100%;
   z-index: 2;
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(255, 255, 255, 0.7);
 }
 
 

@@ -1,8 +1,9 @@
 <script lang="ts">
-import {defineComponent, ref, type Ref} from 'vue'
+import {defineComponent, ref} from 'vue'
 import {MdEditor} from "md-editor-v3";
 import 'md-editor-v3/lib/style.css';
 import {DataProvider} from "@/dataProvider";
+import type {historyItem} from "@/types";
 
 export default defineComponent({
   name: "StoryPointEditor",
@@ -23,6 +24,12 @@ export default defineComponent({
       tab: 'one',
       title: "Story Point Editor",
       description: ref(""),
+      history: ref([{
+        user_fullname: "John Doe",
+        text: "Created story point",
+        created_at: 0,
+        user_id: "0",
+      }] as historyItem[]),
       dialog: false,
     }
   },
@@ -40,6 +47,7 @@ export default defineComponent({
       let storyPoint = await DataProvider.getInstance().getEntireStoryPoint(this.storyPointID);
       this.title = storyPoint?.title ?? "Error fetching title";
       this.description = storyPoint?.description ?? "Error fetching description";
+      this.history = storyPoint?.history ?? [];
     },
     async saveAndExit() {
       //todo
@@ -54,7 +62,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-card>
+  <v-card id="card">
     <v-row>
       <v-col>
         <v-card-title style="cursor: pointer" @click="dialog = true">
@@ -87,7 +95,7 @@ export default defineComponent({
         bg-color="primary"
     >
       <v-tab value="one">Description</v-tab>
-      <v-tab value="two">Logs</v-tab>
+      <v-tab value="two">history</v-tab>
       <v-tab value="three">Images</v-tab>
       <v-tab value="four">Documents</v-tab>
     </v-tabs>
@@ -98,7 +106,15 @@ export default defineComponent({
           <MdEditor style="height: 75vh" v-model="description" language="en-US" preview-theme="vuepress"/>
         </v-window-item>
         <v-window-item value="two">
-          Two
+          <v-list>
+            <v-list-item v-for="historyPoint in history">
+              <v-list-item>
+                <!-- @ts-ignore for some rea -->
+                <v-list-item-title>{{ historyPoint.user_fullname }}</v-list-item-title>
+                <v-list-item-media>{{ historyPoint.text }}</v-list-item-media>
+              </v-list-item>
+            </v-list-item>
+          </v-list>
         </v-window-item>
 
         <v-window-item value="three">
@@ -120,5 +136,9 @@ export default defineComponent({
 }
 .items-end * {
   margin: 8px 8px 8px 0;
+}
+
+#card {
+  background-color: rgba(255, 255, 255, 0.5);
 }
 </style>
