@@ -24,12 +24,8 @@ export default defineComponent({
       tab: 'one',
       title: "Story Point Editor",
       description: ref(""),
-      history: ref([{
-        user_fullname: "John Doe",
-        text: "Created story point",
-        created_at: 0,
-        user_id: "0",
-      }] as historyItem[]),
+      history: ref([] as historyItem[]),
+      newMessage: "",
       dialog: false,
     }
   },
@@ -56,6 +52,9 @@ export default defineComponent({
     async deleteStoryPoint() {
       //todo
       this.closeEditor();
+    },
+    unixTimeToDate(unixTime: number) {
+      return new Date(unixTime * 1000).toLocaleString();
     }
   }
 })
@@ -105,16 +104,19 @@ export default defineComponent({
         <v-window-item value="one">
           <MdEditor style="height: 75vh" v-model="description" language="en-US" preview-theme="vuepress"/>
         </v-window-item>
-        <v-window-item value="two">
-          <v-list>
-            <v-list-item v-for="historyPoint in history">
-              <v-list-item>
-                <!-- @ts-ignore for some rea -->
-                <v-list-item-title>{{ historyPoint.user_fullname }}</v-list-item-title>
-                <v-list-item-media>{{ historyPoint.text }}</v-list-item-media>
-              </v-list-item>
+        <v-window-item style="height: 75vh" value="two">
+          <v-list two-line>
+            <v-list-item class="list-item" v-for="historyPoint in history" :key="historyPoint.created_at">
+                <v-list-item-title>{{ historyPoint.user_fullname }} <small>{{unixTimeToDate(historyPoint.created_at)}}</small></v-list-item-title>
+                <v-list-item-media class="list-item-media">{{ historyPoint.text }}</v-list-item-media>
             </v-list-item>
           </v-list>
+          <v-textarea
+              v-model="newMessage"
+              label="New message"
+              auto-grow
+          ></v-textarea>
+          <v-btn color="primary">Send</v-btn>
         </v-window-item>
 
         <v-window-item value="three">
@@ -136,6 +138,15 @@ export default defineComponent({
 }
 .items-end * {
   margin: 8px 8px 8px 0;
+}
+
+.list-item {
+  background-color: antiquewhite;
+  border-radius: 5px;
+}
+
+.list-item-media {
+  font-size: larger;
 }
 
 #card {
