@@ -69,7 +69,7 @@ onMounted(() => {
     <VMapScaleControl />
 
     <VMapAttributionControl />
-    <VMapMarker v-for="(marker, index) in props.markers" :key="index" :latlng="marker.latLngTuple" @click="onMarkerClicked($event, marker)">
+    <VMapMarker v-for="(marker, index) in props.markers" :key="index" :latlng="marker.coords" @click="onMarkerClicked($event, marker)">
       <VMapPinIcon>
         <icon-story-point />
       </VMapPinIcon>
