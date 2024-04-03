@@ -11,6 +11,7 @@ export type storyPoint = {
     files: [],
     company_id: dbID,
     created_by: dbID,
+    distanceString?: string,
     _id: dbID,
 }
 

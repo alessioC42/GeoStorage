@@ -5,6 +5,7 @@ import OSMSearchResult from './listTiles/OSMSearchResult.vue';
 import {DataProvider} from "@/dataProvider";
 import StoryPointSearchResult from "@/components/listTiles/StoryPointSearchResult.vue";
 import {type LatLngTuple} from "leaflet";
+import DistanceSearchResult from "@/components/listTiles/DistanceSearchResult.vue";
 
 async function openStreetMapSearch(query: string) : Promise<OsmSearchResult[]> {
   const result = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=jsonv2&addressdetails=1&layer=address&limit=15`);
@@ -15,14 +16,15 @@ async function storyPointSearch(query: string) : Promise<storyPoint[]> {
   return DataProvider.getInstance().searchStoryPointsRemote(query);
 }
 
-async function storyPointDistanceSearch(location: LatLngTuple): Promise<storyPoint[]> {
+async function storyPointDistanceSearch(location: LatLngTuple | null): Promise<storyPoint[]> {
+  if (location === null || location === undefined || location[0] === undefined || location[1] === null ) return [];
   return DataProvider.getInstance().searchStoryPointsByDistanceRemote(location);
 }
 
 let searchTimeout: number | null ;
 export default defineComponent({
   name: "Search",
-  components: {StoryPointSearchResult, OSMSearchResult},
+  components: {DistanceSearchResult, StoryPointSearchResult, OSMSearchResult},
   props: {
     searchQuery: {
       type: String,
@@ -38,7 +40,7 @@ export default defineComponent({
     },
     osmLocationSelected: {
       type: Function,
-      default: (result: OsmSearchResult | null) => {},
+      default: (_result: OsmSearchResult | null) => {},
     },
     openStoryPoint: {
       type: Function,
@@ -54,6 +56,7 @@ export default defineComponent({
     return {
       tab: 'storyPoints',
       osmSearchResults: [] as OsmSearchResult[],
+      nearByResults: [] as storyPoint[],
       storyPointRemoteResults: [] as storyPoint[],
       localSearchQuery: this.searchQuery,
     }
@@ -61,16 +64,23 @@ export default defineComponent({
   watch: {
     searchQuery(newVal) {
       this.localSearchQuery = newVal;
+      this.osmSearchResults = [];
+      this.nearByResults = [];
+      this.storyPointRemoteResults = [];
     },
-    mapMarkerLocation(newVal) {
+    async mapMarkerLocation(newVal) {
       this.localSearchQuery = '';
       if (newVal === null) return;
-      storyPointDistanceSearch(newVal);
+      let data = await storyPointDistanceSearch(newVal);
+      if (!data) return;
+      this.osmSearchResults = [];
+      this.nearByResults = data;
     }
   },
   methods: {
     performSearch() {
       this.hideMapMarker();
+      this.nearByResults = [];
       if (searchTimeout) clearTimeout(searchTimeout);
       searchTimeout = setTimeout(async () => {
         this.osmSearchResults = await openStreetMapSearch(this.localSearchQuery);
@@ -78,7 +88,7 @@ export default defineComponent({
         console.log(this.storyPointRemoteResults)
       }, 400);
     },
-  }
+  },
 });
 </script>
 
@@ -98,18 +108,21 @@ export default defineComponent({
       <v-card-text>
         <v-window v-model="tab">
           <v-window-item value="storyPoints">
-            <v-virtual-scroll
-                v-if="storyPointRemoteResults.length > 0"
-                :items="storyPointRemoteResults"
-                :item-height="48"
-                style="height: 45vh;"
+            <div
+                v-if="(storyPointRemoteResults.length+nearByResults.length) > 0"
+                class="scroll-results"
             >
-              <template v-slot="{ item }">
                 <StoryPointSearchResult
+                    v-for="item in storyPointRemoteResults"
                     :story-point="item"
                     :on-press="()=>{openStoryPoint(item)}"  />
-              </template>
-            </v-virtual-scroll>
+                <distance-search-result
+                    v-for="item in nearByResults"
+                    :on-press="()=>{openStoryPoint(item)}"
+                    :title="item.title"
+                    :subtitle="item.distanceString"
+                />
+            </div>
             <div v-else>
               <v-alert v-if="localSearchQuery.trim() === ''">
                 Start typing or click on the map to search for existing storypoints
@@ -121,20 +134,17 @@ export default defineComponent({
           </v-window-item>
 
           <v-window-item value="openStreetMap">
-            <v-virtual-scroll
+
+            <div
+                class="scroll-results"
                 v-if="osmSearchResults.length > 0"
-                :items="osmSearchResults"
-                :item-height="48"
-                style="height: 45vh;"
             >
-              <template v-slot="{ item }">
-                <OSMSearchResult
-                    :key="item.place_id"
-                    :osmSearchResult="item"
-                    :onPress="() => {osmLocationSelected(item)}"
-                ></OSMSearchResult>
-              </template>
-            </v-virtual-scroll>
+              <OSMSearchResult
+                  v-for="item in osmSearchResults"
+                  :osmSearchResult="item"
+                  :onPress="() => {osmLocationSelected(item)}"
+              ></OSMSearchResult>
+            </div>
             <div v-else>
               <v-alert v-if="localSearchQuery.trim() === ''">
                 Start typing to search <a href="https://openstreetmap.org" target="_blank">OpenStreetMap</a> for places
@@ -151,9 +161,32 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.virtual-scroll {
-  height: 50vh;
+.scroll-results {
+  max-height: 45vh;
+  overflow-y: scroll;
 }
+
+/* Width */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 2px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
 #sheet {
   padding: 5px;
   border-radius: 5px;

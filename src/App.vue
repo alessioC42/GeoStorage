@@ -78,6 +78,7 @@ function onStorySelected(storyPoint: storyPoint) {
   setTimeout(()=>{
     searchMarkerLocation.value = null;
   }, 100);
+  console.log("Selected story point: ", storyPoint._id);
   selectedStoryPointID.value = storyPoint._id;
   editorHidden.value = false;
 }

@@ -36,6 +36,7 @@ export default defineComponent({
     storyPointID: {
       immediate: true,
       handler(newVal: string) {
+        this.resetValues();
         this.initStoryPointEditor();
       }
     },
@@ -51,7 +52,7 @@ export default defineComponent({
       this.editItem = null as historyItem | null;
     },
     async initStoryPointEditor() {
-      if (this.storyPointID === "") return;
+      if (this.storyPointID === "" || this.storyPointID === undefined) return;
       let storyPoint = await DataProvider.getInstance().getEntireStoryPoint(this.storyPointID);
       this.title = storyPoint?.title ?? "Error fetching title";
       this.description = storyPoint?.description ?? "Error fetching description";
