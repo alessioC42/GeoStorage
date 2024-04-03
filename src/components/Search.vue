@@ -4,6 +4,7 @@ import type {OsmSearchResult, storyPoint} from "@/types";
 import OSMSearchResult from './listTiles/OSMSearchResult.vue';
 import {DataProvider} from "@/dataProvider";
 import StoryPointSearchResult from "@/components/listTiles/StoryPointSearchResult.vue";
+import {type LatLngTuple} from "leaflet";
 
 async function openStreetMapSearch(query: string) : Promise<OsmSearchResult[]> {
   const result = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=jsonv2&addressdetails=1&layer=address&limit=15`);
@@ -14,6 +15,10 @@ async function storyPointSearch(query: string) : Promise<storyPoint[]> {
   return DataProvider.getInstance().searchStoryPointsRemote(query);
 }
 
+async function storyPointDistanceSearch(location: LatLngTuple): Promise<storyPoint[]> {
+  return DataProvider.getInstance().searchStoryPointsByDistanceRemote(location);
+}
+
 let searchTimeout: number | null ;
 export default defineComponent({
   name: "Search",
@@ -22,6 +27,14 @@ export default defineComponent({
     searchQuery: {
       type: String,
       default: '',
+    },
+    mapMarkerLocation: {
+      type: Object,
+      default: () => ({ lat: 0, lng: 0 }),
+    },
+    hideMapMarker: {
+      type: Function,
+      default: () => {},
     },
     osmLocationSelected: {
       type: Function,
@@ -49,9 +62,16 @@ export default defineComponent({
     searchQuery(newVal) {
       this.localSearchQuery = newVal;
     },
+    mapMarkerLocation(newVal) {
+      this.localSearchQuery = '';
+      storyPointDistanceSearch(newVal).then((results) => {
+        console.log(results);
+      });
+    }
   },
   methods: {
     performSearch() {
+      this.hideMapMarker();
       if (searchTimeout) clearTimeout(searchTimeout);
       searchTimeout = setTimeout(async () => {
         this.osmSearchResults = await openStreetMapSearch(this.localSearchQuery);

@@ -10,13 +10,28 @@
       <Search
           :search-query="searchQuery"
           :osm-location-selected="updateSearchMarkerLocation"
-          :open-story-point="onStorySelected"/>
+          :open-story-point="onStorySelected"
+          :map-marker-location="searchMarkerLocation as Record<string, any> | undefined"
+          :hide-map-marker="() => {searchMarkerLocation = null;}"
+      />
     </div>
     <div class="map-overlay">
       <PlaceDescription
           id="placeDesc"
           :lat-lng-tuple="searchMarkerLocation"
           :on-new-story-created="() => {searchMarkerLocation = null}" />
+      <v-expansion-panels id="expansion-panel-top">
+        <v-expansion-panel>
+          <v-expansion-panel-title>
+            Logged in as {{ DataProvider.getInstance().userData.fullname.value }} - {{ DataProvider.getInstance().userData.email.value }}
+          </v-expansion-panel-title>
+          <v-expansion-panel-text>
+            <p>Contact your Company Administrator to change your details or password if necessary.</p>
+            <v-btn style="margin-top: 5px" color="red" @click="DataProvider.getInstance().logout">Logout</v-btn>
+
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+      </v-expansion-panels>
     </div>
     <div :hidden="editorHidden" class="filled-map-overlay">
       <StoryPointEditor
@@ -32,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref, watch} from 'vue';
+import {ref} from 'vue';
 import Map from '@/components/Map.vue'
 import {type OsmSearchResult, type storyPoint} from "@/types";
 import type {LatLng, LeafletMouseEvent} from "leaflet";
@@ -59,10 +74,12 @@ function onMapClick(mouseEvent: LeafletMouseEvent) {
 }
 
 function onStorySelected(storyPoint: storyPoint) {
-  const storyPointID = storyPoint.id;
-  console.log('Story point selected: ' + storyPointID)
+  searchMarkerLocation.value = storyPoint.coords as [number, number];
+  setTimeout(()=>{
+    searchMarkerLocation.value = null;
+  }, 100);
+  selectedStoryPointID.value = storyPoint.id;
   editorHidden.value = false;
-  selectedStoryPointID.value = storyPointID;
 }
 
 </script>
@@ -92,6 +109,14 @@ function onStorySelected(storyPoint: storyPoint) {
   background-color: rgba(255, 255, 255, 0.8);
 }
 
+#expansion-panel-top {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, 0);
+  z-index: 1;
+  max-width: 30vw;
+}
 
 #placeDesc {
   margin: 10px;

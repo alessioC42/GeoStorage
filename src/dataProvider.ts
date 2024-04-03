@@ -68,7 +68,7 @@ export class DataProvider {
                 if (success) {
                     let json = JSON.parse(statusText);
                     localStorage.setItem('jwt', json.token);
-                    this.loggedIn.value = success;
+                    window.location.reload();
                     return ["Auth successful!", success];
                 }
                 return [statusText, success];
@@ -81,6 +81,11 @@ export class DataProvider {
         }
     }
 
+    logout() {
+        localStorage.removeItem('jwt');
+        window.location.reload();
+    }
+
     async getUserInformation() : Promise<user | null> {
         try {
         const response = await this.fetch(`${this.baseURL}/api/user`);
@@ -90,7 +95,6 @@ export class DataProvider {
             this.userData.email.value = result.email;
             this.userData.user_id.value = result.id;
             this.companyID = result.company_id;
-            console.log(result.company_id);
             return result;
         } else {
             return null;
@@ -107,7 +111,6 @@ export class DataProvider {
         let response = await this.fetch(`${this.baseURL}/api/company/${this.companyID}/storypoints`);
         let result: storyPoint[] = (await response.json())["storypoints"];
         this.stories.value = result;
-        console.log(result);
         return result;
     }
 
@@ -148,17 +151,17 @@ export class DataProvider {
         }
     }
 
-    async getEntireStoryPoint(id: string): Promise<storyPoint | null> {
+    async searchStoryPointsByDistanceRemote(coords: LatLngTuple): Promise<storyPoint[]> {
         try {
-            const response = await this.fetch(`${this.baseURL}/api/company/${this.companyID}/storypoints/${id}`);
+            const response = await this.fetch(`${this.baseURL}/api/company/${this.companyID}/storypoints/nearby?lat=${coords[0]}&lng=${coords[1]}`);
             if (response.status == 200) {
-                return (await response.json())["storypoint"] as storyPoint;
+                return (await response.json())["storypoints"] as storyPoint[];
             } else {
-                return null;
+                return [];
             }
         } catch (e) {
             console.error(e);
-            return null;
+            return [];
         }
     }
 
