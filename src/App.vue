@@ -18,7 +18,7 @@
     <div :hidden="editorHidden" class="filled-map-overlay">
       <StoryPointEditor
           :story-point-i-d="selectedStoryPointID"
-          :close-editor="() => editorHidden = true"
+          :close-editor="() => {editorHidden = true; selectedStoryPointID = '';}"
       />
 
     </div>

@@ -17,8 +17,9 @@ export type storyPoint = {
 export type historyItem = {
     created_at: unixTimestamp,
     user_id: dbID,
-    user_fullname: string;
+    user_fullname: string,
     text: string,
+    edited: boolean,
 }
 
 export type user = {

@@ -3,7 +3,7 @@ import {defineComponent, ref} from 'vue'
 import {MdEditor} from "md-editor-v3";
 import 'md-editor-v3/lib/style.css';
 import {DataProvider} from "@/dataProvider";
-import type {historyItem} from "@/types";
+import type {historyItem, unixTimestamp} from "@/types";
 
 export default defineComponent({
   name: "StoryPointEditor",
@@ -38,23 +38,53 @@ export default defineComponent({
     },
   },
   methods: {
+    resetValues() {
+      this.title = "";
+      this.description = "";
+      this.history = [];
+      this.newMessage = "";
+      this.dialog = false;
+
+    },
     async initStoryPointEditor() {
       if (this.storyPointID === "") return;
       let storyPoint = await DataProvider.getInstance().getEntireStoryPoint(this.storyPointID);
       this.title = storyPoint?.title ?? "Error fetching title";
       this.description = storyPoint?.description ?? "Error fetching description";
-      this.history = storyPoint?.history ?? [];
+      this.history = storyPoint?.history ?? []
     },
     async saveAndExit() {
-      //todo
+      if (this.newMessage.trim() !== "") {
+        this.history.push({
+          user_fullname: DataProvider.getInstance().userData.fullname.value,
+          created_at: Math.floor(Date.now() / 1000),
+          text: this.newMessage,
+          user_id: DataProvider.getInstance().userData.fullname.value,
+          edited: false
+        })
+      }
+
+      await DataProvider.getInstance().updateStoryPoint(this.storyPointID, {
+        title: this.title,
+        description: this.description,
+        history: this.history
+      });
+      this.resetValues();
+
       this.closeEditor();
     },
     async deleteStoryPoint() {
       //todo
       this.closeEditor();
     },
-    unixTimeToDate(unixTime: number) {
+    unixTimeToDate(unixTime: unixTimestamp) {
       return new Date(unixTime * 1000).toLocaleString();
+    },
+    deleteHistoryItem(item: historyItem) {
+      this.history = this.history.filter((historyItem) => historyItem !== item);
+    },
+    editHistoryContend(item: historyItem) {
+      //todo
     }
   }
 })
@@ -105,17 +135,30 @@ export default defineComponent({
           <MdEditor style="height: 75vh" v-model="description" language="en-US" preview-theme="vuepress"/>
         </v-window-item>
         <v-window-item style="height: 75vh" value="two">
-          <v-list two-line>
-            <v-list-item class="list-item" v-for="historyPoint in history" :key="historyPoint.created_at">
-                <v-list-item-title>{{ historyPoint.user_fullname }} <small>{{unixTimeToDate(historyPoint.created_at)}}</small></v-list-item-title>
-                <v-list-item-media class="list-item-media">{{ historyPoint.text }}</v-list-item-media>
-            </v-list-item>
-          </v-list>
-          <v-textarea
-              v-model="newMessage"
-              label="New message"
-              auto-grow
-          ></v-textarea>
+          <div class="scrollable-list">
+            <v-list>
+              <v-list-item class="list-item" v-for="historyPoint in history" :key="historyPoint.created_at">
+                <v-row>
+                  <v-col>
+                    <v-list-item-title>{{ historyPoint.user_fullname }} <small>{{unixTimeToDate(historyPoint.created_at)}}</small></v-list-item-title>
+                    <v-list-item-media class="list-item-media">{{ historyPoint.text }} <small><i>{{historyPoint.edited? "edited":""}}</i></small></v-list-item-media>
+                  </v-col>
+                  <v-col>
+                    <v-list-item-action class="items-end">
+                      <v-btn @click="editHistoryContend(historyPoint)" size="40" icon="mdi-pen" />
+                      <v-btn @click="deleteHistoryItem(historyPoint)" size="40" icon="mdi-delete" />
+                    </v-list-item-action>
+                  </v-col>
+                </v-row>
+
+              </v-list-item>
+            </v-list>
+            <v-textarea
+                v-model="newMessage"
+                label="Add new message (Upload with save button)"
+                auto-grow
+            />
+          </div>
           <v-btn color="primary">Send</v-btn>
         </v-window-item>
 
@@ -143,10 +186,18 @@ export default defineComponent({
 .list-item {
   background-color: antiquewhite;
   border-radius: 5px;
+  margin: 10px 5px 5px;
 }
 
 .list-item-media {
   font-size: larger;
+}
+
+.scrollable-list {
+  display: flex;
+  flex-direction: column-reverse;
+  overflow-y: auto;
+  height: 75vh;
 }
 
 #card {

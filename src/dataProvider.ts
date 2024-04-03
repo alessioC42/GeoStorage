@@ -1,4 +1,4 @@
-import type {dbID, storyPoint, user} from "@/types";
+import type {dbID, historyItem, storyPoint, user} from "@/types";
 import {type Ref, ref} from "vue";
 import type {LatLngTuple} from "leaflet";
 
@@ -8,6 +8,7 @@ export class DataProvider {
     userData = {
         fullname: ref<string>(""),
         email: ref<string>(""),
+        user_id: ref<string>(""),
     };
     companyID: string = "";
     loggedIn: Ref<boolean> = ref(false);
@@ -87,6 +88,7 @@ export class DataProvider {
             const result: user = (await response.json())["user"];
             this.userData.fullname.value = result.fullname;
             this.userData.email.value = result.email;
+            this.userData.user_id.value = result.id;
             this.companyID = result.company_id;
             console.log(result.company_id);
             return result;
@@ -96,6 +98,7 @@ export class DataProvider {
         } catch (e) {
             this.userData.fullname.value = "";
             this.userData.email.value = "";
+            this.userData.user_id.value = "";
             return null;
         }
     }
@@ -159,7 +162,7 @@ export class DataProvider {
         }
     }
 
-    async updateStoryPoint(id: dbID, title: string, description: string, history: string[]): Promise<void> {
+    async updateStoryPoint(id: dbID, {title, description, history}: {title: string, description: string, history: historyItem[]}): Promise<void> {
         try {
             const response = await this.fetch(`${this.baseURL}/api/company/${this.companyID}/storypoints/${id}`, {
                 method: 'PUT',
