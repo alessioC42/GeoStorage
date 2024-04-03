@@ -8,8 +8,13 @@ import {type LatLngTuple} from "leaflet";
 import DistanceSearchResult from "@/components/listTiles/DistanceSearchResult.vue";
 
 async function openStreetMapSearch(query: string) : Promise<OsmSearchResult[]> {
+  try {
   const result = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=jsonv2&addressdetails=1&layer=address&limit=15`);
   return result.json();
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
 }
 
 async function storyPointSearch(query: string) : Promise<storyPoint[]> {
