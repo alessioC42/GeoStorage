@@ -64,9 +64,8 @@ export default defineComponent({
     },
     mapMarkerLocation(newVal) {
       this.localSearchQuery = '';
-      storyPointDistanceSearch(newVal).then((results) => {
-        console.log(results);
-      });
+      if (newVal === null) return;
+      storyPointDistanceSearch(newVal);
     }
   },
   methods: {

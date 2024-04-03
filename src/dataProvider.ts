@@ -81,10 +81,10 @@ export class DataProvider {
         }
     }
 
-    async logout() {
-        try {
-            await this.fetch(`${this.baseURL}/api/logout`, {method: 'POST'});
-        } catch (e) {}
+    async logout() : Promise<void> {
+        // todo: fix logout
+        //const response = await this.fetch(`${this.baseURL}/api/logout`, {method: 'POST'});
+        //console.log(response)
         localStorage.removeItem('jwt');
         window.location.reload();
     }
@@ -206,6 +206,104 @@ export class DataProvider {
             }
         } catch (e) {
             return [];
+        }
+    }
+
+    getFileBlob(): Promise<[Blob, string] | null> {
+        return new Promise((resolve) => {
+            const input = document.createElement('input');
+            input.type = 'file';
+
+            input.onchange = (e) => {
+                const target = e.target as HTMLInputElement;
+                const file = target.files ? target.files[0] : null;
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const target = event.target as FileReader;
+                        const result = target.result;
+                        if (result) {
+                            resolve([new Blob([new Uint8Array(result as ArrayBuffer)]), file.name]);
+                        } else {
+                            resolve(null);
+                        }
+                    };
+                    reader.readAsArrayBuffer(file);
+                } else {
+                    resolve(null);
+                }
+            };
+
+            input.click();
+        });
+    }
+
+    async uploadFile(file: Blob, filename: string,storyPointID:string): Promise<void> {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = this.fetch(`${this.baseURL}/api/company/${this.companyID}/storypoints/${storyPointID}/files?filename=${encodeURIComponent(filename)}`, {
+            method: 'POST',
+            body: formData,
+        });
+    }
+
+    async downloadFile(url: string, filename: string): Promise<void> {
+        try {
+            const response = await this.fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    async downloadStoryArchive(storyID: string): Promise<void> {
+        try {
+            await this.downloadFile(`${this.baseURL}/api/company/${this.companyID}/storypoints/${storyID}/files/archive`, "archive.zip")
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    async downloadStoryFile(storyID: string, fileID: string, filename: string) {
+        try {
+            await this.downloadFile(`${this.baseURL}/api/company/${this.companyID}/storypoints/${storyID}/files/${fileID}`, filename)
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    async deleteStoryFile(storyID: string, fileID: string) {
+        try {
+            await this.fetch(`${this.baseURL}/api/company/${this.companyID}/storypoints/${storyID}/files/${fileID}`, {
+                method: "DELETE"
+            })
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    async renameStoryFile(storyID: string, fileID: string, newName: string): Promise<void> {
+        try {
+            await this.fetch(`${this.baseURL}/api/company/${this.companyID}/storypoints/${storyID}/files/${fileID}/rename`, {
+                method: "PUT",
+                body: JSON.stringify({file: {filename: newName}}),
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+        } catch (e) {
+            console.error(e)
         }
     }
 }

@@ -5,13 +5,20 @@ import type {remoteFile, storyPoint} from "@/types";
 import FileCard from "@/components/FileCard.vue";
 import {DataProvider} from "@/dataProvider";
 
+let latest = "";
 
 export default defineComponent({
   name: 'DocumentViewer',
+  computed: {
+    DataProvider() {
+      return DataProvider
+    }
+  },
   components: {FileCard},
   data(vm) {
     return {
       storyPoint: null as storyPoint | null,
+      storyID: "",
       remoteFiles: [] as remoteFile[],
     }
   },
@@ -24,16 +31,28 @@ export default defineComponent({
   watch: {
     storyPointID: {
       immediate: true,
-      handler(newValue) {this.storyPoint = newValue;this.initState();}
+      async handler(newValue) {
+        if (newValue === "") return;
+        this.storyID = newValue;
+        latest = newValue;
+        this.remoteFiles = await DataProvider.getInstance().getAllFiles(this.storyID);
+      }
     }
   },
   methods: {
-    async initState() {
-      this.remoteFiles = await DataProvider.getInstance().getAllFiles(this.storyPointID);
-    },
     getThumbnail(file: remoteFile) {
       return 'https://via.placeholder.com/150';
     },
+    async uploadNewFile() {
+      const res: [Blob, string] | null = await DataProvider.getInstance().getFileBlob();
+      if (!res) return;
+      console.log("start uploading...");
+      await DataProvider.getInstance().uploadFile(res[0], res[1], latest);
+      console.log("finished uploading!");
+      setTimeout( async() => {
+        this.remoteFiles = await DataProvider.getInstance().getAllFiles(this.storyID);
+      }, 500);
+    }
   }
 });
 
@@ -48,8 +67,8 @@ export default defineComponent({
     >
       <v-toolbar-title style="font-size: large">Stored Documents for your StoryPoint</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn icon="mdi-plus" />
-      <v-btn icon="mdi-download" />
+      <v-btn icon="mdi-plus" @click="uploadNewFile" />
+      <v-btn icon="mdi-download" @click="DataProvider.getInstance().downloadStoryArchive(storyID)" />
     </v-app-bar>
     <v-sheet style="height: 100%;margin-top: 85px;overflow-y: scroll; overflow-x: hidden">
       <v-row style="padding-right: 10px">
@@ -57,7 +76,8 @@ export default defineComponent({
             v-for="(file, index) in remoteFiles"
             :key="index"
             :file="file"
-            :refresh-everything="initState"
+            :story-point-id="storyID"
+            :refresh-everything="async () => {remoteFiles = await DataProvider.getInstance().getAllFiles(storyID)}"
         />
       </v-row>
     </v-sheet>
