@@ -77,7 +77,7 @@ export default defineComponent({
     </v-app-bar>
     <v-sheet style="height: 100%;margin-top: 85px;overflow-y: scroll; overflow-x: hidden">
       <v-row style="padding-right: 10px">
-        <v-progress-circular class="loading-indicator" indeterminate v-if="isLoading"></v-progress-circular>
+        <v-progress-circular class="center-screen" indeterminate v-if="isLoading"></v-progress-circular>
         <FileCard
             v-for="(file, index) in remoteFiles"
             :key="index"
@@ -86,13 +86,20 @@ export default defineComponent({
             :refresh-everything="reloadFileList"
             v-else
         />
+        <div
+            class="center-screen"
+          v-if="remoteFiles.length === 0 && !isLoading"
+        >
+          <v-icon size="100">mdi-file-find-outline</v-icon>
+          <h2>No files found</h2>
+        </div>
       </v-row>
     </v-sheet>
   </v-app>
 </template>
 
 <style scoped>
-.loading-indicator {
+.center-screen {
   position: fixed;
   top: 50%;
   left: 50%;
