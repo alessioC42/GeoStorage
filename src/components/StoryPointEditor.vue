@@ -27,6 +27,8 @@ export default defineComponent({
       history: ref([] as historyItem[]),
       newMessage: "",
       dialog: false,
+      editDialog: false,
+      editItem: null as historyItem | null,
     }
   },
   watch: {
@@ -44,17 +46,19 @@ export default defineComponent({
       this.history = [];
       this.newMessage = "";
       this.dialog = false;
-
+      this.editDialog = false;
+      this.editItem = null as historyItem | null;
     },
     async initStoryPointEditor() {
       if (this.storyPointID === "") return;
       let storyPoint = await DataProvider.getInstance().getEntireStoryPoint(this.storyPointID);
       this.title = storyPoint?.title ?? "Error fetching title";
       this.description = storyPoint?.description ?? "Error fetching description";
-      this.history = storyPoint?.history ?? []
+      this.history = storyPoint?.history.reverse() ?? []
     },
     async saveAndExit() {
-      if (this.newMessage.trim() !== "") {
+      this.newMessage = this.newMessage.trim();
+      if (this.newMessage !== "") {
         this.history.push({
           user_fullname: DataProvider.getInstance().userData.fullname.value,
           created_at: Math.floor(Date.now() / 1000),
@@ -84,8 +88,15 @@ export default defineComponent({
       this.history = this.history.filter((historyItem) => historyItem !== item);
     },
     editHistoryContend(item: historyItem) {
-      //todo
-    }
+      this.editItem = item;
+      this.editDialog = true;
+    },
+    saveEditedHistory() {
+      if (this.editItem) {
+        this.editItem.edited = true;
+      }
+      this.editDialog = false;
+    },
   }
 })
 </script>
@@ -138,12 +149,12 @@ export default defineComponent({
           <div class="scrollable-list">
             <v-list>
               <v-list-item class="list-item" v-for="historyPoint in history" :key="historyPoint.created_at">
-                <v-row>
+                <v-row >
                   <v-col>
                     <v-list-item-title>{{ historyPoint.user_fullname }} <small>{{unixTimeToDate(historyPoint.created_at)}}</small></v-list-item-title>
                     <v-list-item-media class="list-item-media">{{ historyPoint.text }} <small><i>{{historyPoint.edited? "edited":""}}</i></small></v-list-item-media>
                   </v-col>
-                  <v-col>
+                  <v-col cols="2">
                     <v-list-item-action class="items-end">
                       <v-btn @click="editHistoryContend(historyPoint)" size="40" icon="mdi-pen" />
                       <v-btn @click="deleteHistoryItem(historyPoint)" size="40" icon="mdi-delete" />
@@ -171,6 +182,20 @@ export default defineComponent({
       </v-window>
     </v-card-text>
   </v-card>
+  <v-dialog v-model="editDialog" max-height="50vh" max-width="70vw">
+    <v-card>
+      <v-card-title>
+        Edit message content
+      </v-card-title>
+      <v-card-text>
+        <v-textarea v-model="editItem!.text" label="Edit content" autofocus></v-textarea>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="blue darken-1" @click="saveEditedHistory">Save</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <style scoped>
@@ -201,6 +226,6 @@ export default defineComponent({
 }
 
 #card {
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.9);
 }
 </style>
