@@ -9,7 +9,7 @@ import DistanceSearchResult from "@/components/listTiles/DistanceSearchResult.vu
 
 async function openStreetMapSearch(query: string) : Promise<OsmSearchResult[]> {
   try {
-  const result = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=jsonv2&addressdetails=1&layer=address&limit=15`);
+  const result = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=jsonv2&addressdetails=1&layer=address&limit=8`);
   return result.json();
   } catch (e) {
     console.error(e);
