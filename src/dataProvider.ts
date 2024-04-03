@@ -20,7 +20,7 @@ export class DataProvider {
 
     static getInstance(): DataProvider {
         if (!DataProvider.instance) {
-            DataProvider.instance = new DataProvider('http://localhost:3000');
+            DataProvider.instance = new DataProvider('https://geostorage.duckdns.org');
         }
         return DataProvider.instance;
     }
