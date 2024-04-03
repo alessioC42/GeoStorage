@@ -58,7 +58,8 @@ export default defineComponent({
       let storyPoint = await DataProvider.getInstance().getEntireStoryPoint(this.storyPointID);
       this.title = storyPoint?.title ?? "Error fetching title";
       this.description = storyPoint?.description ?? "Error fetching description";
-      this.history = storyPoint?.history.reverse() ?? []
+      this.history = storyPoint?.history ?? []
+      this.history = this.history.sort((a, b) => b.created_at - a.created_at);
     },
     async saveAndExit() {
       this.newMessage = this.newMessage.trim();
