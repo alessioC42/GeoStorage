@@ -11,7 +11,15 @@ export type storyPoint = {
     files: [],
     company_id: dbID,
     created_by: dbID,
-    id: dbID,
+    _id: dbID,
+}
+
+export type remoteFile = {
+    _id: dbID,
+    filename: string,
+    created_by: dbID,
+    filesize: number,
+    created_at: unixTimestamp
 }
 
 export type historyItem = {
@@ -23,7 +31,7 @@ export type historyItem = {
 }
 
 export type user = {
-    id: dbID,
+    _id: dbID,
     fullname: string,
     email: string,
     company_id: dbID,

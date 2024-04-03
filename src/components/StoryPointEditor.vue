@@ -4,10 +4,11 @@ import {MdEditor} from "md-editor-v3";
 import 'md-editor-v3/lib/style.css';
 import {DataProvider} from "@/dataProvider";
 import type {historyItem, unixTimestamp} from "@/types";
+import DocumentViewer from "@/components/DocumentViewer.vue";
 
 export default defineComponent({
   name: "StoryPointEditor",
-  components: {MdEditor},
+  components: {DocumentViewer, MdEditor},
   title: 'Story Point Editor',
   props: {
     storyPointID: {
@@ -173,11 +174,11 @@ export default defineComponent({
           <v-btn color="primary">Send</v-btn>
         </v-window-item>
 
-        <v-window-item value="three">
+        <v-window-item style="height: 75vh" value="three">
           Three
         </v-window-item>
-        <v-window-item value="four">
-          Three
+        <v-window-item style="height: 75vh" value="four">
+          <DocumentViewer :story-point-i-d="storyPointID"/>
         </v-window-item>
       </v-window>
     </v-card-text>

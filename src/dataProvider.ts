@@ -1,4 +1,4 @@
-import type {dbID, historyItem, storyPoint, user} from "@/types";
+import type {dbID, historyItem, remoteFile, storyPoint, user} from "@/types";
 import {type Ref, ref} from "vue";
 import type {LatLngTuple} from "leaflet";
 
@@ -81,7 +81,10 @@ export class DataProvider {
         }
     }
 
-    logout() {
+    async logout() {
+        try {
+            await this.fetch(`${this.baseURL}/api/logout`, {method: 'POST'});
+        } catch (e) {}
         localStorage.removeItem('jwt');
         window.location.reload();
     }
@@ -93,7 +96,7 @@ export class DataProvider {
             const result: user = (await response.json())["user"];
             this.userData.fullname.value = result.fullname;
             this.userData.email.value = result.email;
-            this.userData.user_id.value = result.id;
+            this.userData.user_id.value = result._id;
             this.companyID = result.company_id;
             return result;
         } else {
@@ -112,6 +115,20 @@ export class DataProvider {
         let result: storyPoint[] = (await response.json())["storypoints"];
         this.stories.value = result;
         return result;
+    }
+
+    async getEntireStoryPoint(id: string): Promise<storyPoint | null> {
+        try {
+            const response = await this.fetch(`${this.baseURL}/api/company/${this.companyID}/storypoints/${id}`);
+            if (response.status == 200) {
+                return (await response.json())["storypoint"] as storyPoint;
+            } else {
+                return null;
+            }
+        } catch (e) {
+            console.error(e);
+            return null;
+        }
     }
 
     async createStoryPoint(coords: LatLngTuple, title: string, description: string): Promise<string | null> {
@@ -176,6 +193,19 @@ export class DataProvider {
             });
         } catch (e) {
             console.error(e);
+        }
+    }
+
+    async getAllFiles(storyPoint: string): Promise<remoteFile[]> {
+        try {
+            const response = await this.fetch(`${this.baseURL}/api/company/${this.companyID}/storypoints/${storyPoint}/files`);
+            if (response.status == 200) {
+                return (await response.json())["files"] as remoteFile[];
+            } else {
+                return [];
+            }
+        } catch (e) {
+            return [];
         }
     }
 }

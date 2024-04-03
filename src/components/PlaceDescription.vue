@@ -13,7 +13,7 @@ async function loadPlace() {
   isLoading.value = true;
   const result = await fetch(`https://nominatim.openstreetmap.org/reverse.php?lat=${props.latLngTuple[0]}&lon=${props.latLngTuple[1]}&format=jsonv2`);
   const osmResult: OsmSearchResult = await result.json();
-  title =(osmResult.address?.house_number || '') + ' ' + (osmResult.address?.road || '') + ' ' + (osmResult.address?.city || '') + `(${props.latLngTuple[0].toFixed(8)}/${props.latLngTuple[1].toFixed(8)})`;
+  title =(osmResult.address?.house_number || '') + ' ' + (osmResult.address?.road || '') + ' ' + (osmResult.address?.city || ''); // + `(${props.latLngTuple[0].toFixed(8) ?? ""}/${props.latLngTuple[1].toFixed(8) ?? ""})`;
   subtitle = osmResult.display_name || `Coordinates: ${props.latLngTuple[0]}, ${props.latLngTuple[1]}`;
   isLoading.value = false;
 }
