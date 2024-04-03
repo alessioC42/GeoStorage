@@ -82,9 +82,7 @@ export class DataProvider {
     }
 
     async logout() : Promise<void> {
-        // todo: fix logout
-        //const response = await this.fetch(`${this.baseURL}/api/logout`, {method: 'POST'});
-        //console.log(response)
+        await this.fetch(`${this.baseURL}/api/logout`, {method: 'POST'});
         localStorage.removeItem('jwt');
         window.location.reload();
     }

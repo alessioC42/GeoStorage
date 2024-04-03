@@ -27,7 +27,7 @@
           </v-expansion-panel-title>
           <v-expansion-panel-text>
             <p>Contact your Company Administrator to change your details or password if necessary.</p>
-            <v-btn style="margin-top: 5px" color="red" @click="DataProvider.getInstance().logout">Logout</v-btn>
+            <v-btn style="margin-top: 5px" color="red" @click="() => {DataProvider.getInstance().logout()}">Logout</v-btn>
 
           </v-expansion-panel-text>
         </v-expansion-panel>
