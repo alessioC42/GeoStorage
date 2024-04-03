@@ -306,4 +306,23 @@ export class DataProvider {
             console.error(e)
         }
     }
+
+    async getThumnnailBase64Image(storyID:string, fileID:string): Promise<string> {
+        try {
+            const response = await this.fetch(`${this.baseURL}/api/company/${this.companyID}/storypoints/${storyID}/files/${fileID}/thumbnail`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const blob = await response.blob();
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        } catch (e) {
+            console.error(e);
+            return window.location.origin+'/file.png';
+        }
+    }
 }

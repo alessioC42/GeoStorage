@@ -137,7 +137,6 @@ export default defineComponent({
     >
       <v-tab value="one">Description</v-tab>
       <v-tab value="two">history</v-tab>
-      <v-tab value="three">Images</v-tab>
       <v-tab value="four">Documents</v-tab>
     </v-tabs>
 
@@ -172,10 +171,6 @@ export default defineComponent({
             />
           </div>
           <v-btn color="primary">Send</v-btn>
-        </v-window-item>
-
-        <v-window-item style="height: 75vh" value="three">
-          Three
         </v-window-item>
         <v-window-item style="height: 75vh" value="four">
           <DocumentViewer :story-point-i-d="storyPointID"/>

@@ -20,6 +20,7 @@ export default defineComponent({
       storyPoint: null as storyPoint | null,
       storyID: "",
       remoteFiles: [] as remoteFile[],
+      isLoading: true
     }
   },
   props: {
@@ -35,22 +36,25 @@ export default defineComponent({
         if (newValue === "") return;
         this.storyID = newValue;
         latest = newValue;
-        this.remoteFiles = await DataProvider.getInstance().getAllFiles(this.storyID);
+        this.reloadFileList();
       }
     }
   },
   methods: {
-    getThumbnail(file: remoteFile) {
-      return 'https://via.placeholder.com/150';
-    },
     async uploadNewFile() {
       const res: [Blob, string] | null = await DataProvider.getInstance().getFileBlob();
       if (!res) return;
       console.log("start uploading...");
       await DataProvider.getInstance().uploadFile(res[0], res[1], latest);
       console.log("finished uploading!");
+      await this.reloadFileList();
+    },
+    async reloadFileList() {
+      this.isLoading = true;
+      this.remoteFiles = [];
       setTimeout( async() => {
         this.remoteFiles = await DataProvider.getInstance().getAllFiles(this.storyID);
+        this.isLoading = false;
       }, 500);
     }
   }
@@ -67,17 +71,20 @@ export default defineComponent({
     >
       <v-toolbar-title style="font-size: large">Stored Documents for your StoryPoint</v-toolbar-title>
       <v-spacer></v-spacer>
+      <v-btn icon="mdi-reload" @click="reloadFileList"></v-btn>
       <v-btn icon="mdi-plus" @click="uploadNewFile" />
       <v-btn icon="mdi-download" @click="DataProvider.getInstance().downloadStoryArchive(storyID)" />
     </v-app-bar>
     <v-sheet style="height: 100%;margin-top: 85px;overflow-y: scroll; overflow-x: hidden">
       <v-row style="padding-right: 10px">
+        <v-progress-circular class="loading-indicator" indeterminate v-if="isLoading"></v-progress-circular>
         <FileCard
             v-for="(file, index) in remoteFiles"
             :key="index"
             :file="file"
             :story-point-id="storyID"
-            :refresh-everything="async () => {remoteFiles = await DataProvider.getInstance().getAllFiles(storyID)}"
+            :refresh-everything="reloadFileList"
+            v-else
         />
       </v-row>
     </v-sheet>
@@ -85,5 +92,10 @@ export default defineComponent({
 </template>
 
 <style scoped>
-
+.loading-indicator {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
 </style>
