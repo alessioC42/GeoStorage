@@ -80,6 +80,7 @@ export default defineComponent({
         <v-window v-model="tab">
           <v-window-item value="storyPoints">
             <v-virtual-scroll
+                v-if="storyPointRemoteResults.length > 0"
                 :items="storyPointRemoteResults"
                 :item-height="48"
                 style="height: 45vh;"
@@ -90,10 +91,19 @@ export default defineComponent({
                     :on-press="()=>{openStoryPoint(item)}"  />
               </template>
             </v-virtual-scroll>
+            <div v-else>
+              <v-alert v-if="localSearchQuery.trim() === ''">
+                Start typing or click on the map to search for existing storypoints
+              </v-alert>
+              <v-alert v-else>
+                No results found
+              </v-alert>
+            </div>
           </v-window-item>
 
           <v-window-item value="openStreetMap">
             <v-virtual-scroll
+                v-if="osmSearchResults.length > 0"
                 :items="osmSearchResults"
                 :item-height="48"
                 style="height: 45vh;"
@@ -106,6 +116,14 @@ export default defineComponent({
                 ></OSMSearchResult>
               </template>
             </v-virtual-scroll>
+            <div v-else>
+              <v-alert v-if="localSearchQuery.trim() === ''">
+                Start typing to search <a href="https://openstreetmap.org" target="_blank">OpenStreetMap</a> for places
+              </v-alert>
+              <v-alert v-else>
+                No results found
+              </v-alert>
+            </div>
           </v-window-item>
         </v-window>
       </v-card-text>
