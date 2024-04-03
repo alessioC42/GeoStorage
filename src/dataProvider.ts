@@ -113,6 +113,7 @@ export class DataProvider {
     async getAllStories() : Promise<storyPoint[]> {
         let response = await this.fetch(`${this.baseURL}/api/company/${this.companyID}/storypoints`);
         let result: storyPoint[] = (await response.json())["storypoints"];
+        this.stories.value = [];
         this.stories.value = result;
         return result;
     }
@@ -141,7 +142,7 @@ export class DataProvider {
                 }
             });
             if (response.status == 201) {
-                //now await
+                //no await since it is loaded by reference
                 this.getAllStories();
                 //(await response.json())["storypoint_id"]
                 return null;
@@ -151,6 +152,20 @@ export class DataProvider {
         } catch (e) {
             console.error(e);
             return "an unexpected error occurred while creating the story point!";
+        }
+    }
+
+    async deleteStoryPoint(id: dbID): Promise<void> {
+        try {
+            const response = await this.fetch(`${this.baseURL}/api/company/${this.companyID}/storypoints/${id}`, {
+                method: 'DELETE'
+            });
+            if (response.status == 200) {
+                //no await since it is loaded by reference
+                this.getAllStories();
+            }
+        } catch (e) {
+            console.error(e);
         }
     }
 

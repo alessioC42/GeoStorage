@@ -30,6 +30,7 @@ export default defineComponent({
       dialog: false,
       editDialog: false,
       editItem: null as historyItem | null,
+      confirmDeleteDialog: false,
     }
   },
   watch: {
@@ -50,6 +51,7 @@ export default defineComponent({
       this.dialog = false;
       this.editDialog = false;
       this.editItem = null as historyItem | null;
+      this.confirmDeleteDialog = false;
     },
     async initStoryPointEditor() {
       if (this.storyPointID === "" || this.storyPointID === undefined) return;
@@ -80,9 +82,13 @@ export default defineComponent({
       this.closeEditor();
     },
     async deleteStoryPoint() {
-      //todo
+      this.confirmDeleteDialog = true;
+    },
+    async confirmDelete() {
+      await DataProvider.getInstance().deleteStoryPoint(this.storyPointID);
       this.closeEditor();
     },
+
     unixTimeToDate(unixTime: unixTimestamp) {
       return new Date(unixTime * 1000).toLocaleString();
     },
@@ -190,6 +196,16 @@ export default defineComponent({
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="blue darken-1" @click="saveEditedHistory">Save</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+  <v-dialog v-model="confirmDeleteDialog" max-width="290">
+    <v-card>
+      <v-card-title class="headline">Are you sure?</v-card-title>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="green darken-1" @click="confirmDeleteDialog = false">Cancel</v-btn>
+        <v-btn color="red darken-1" @click="confirmDelete">Delete</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
