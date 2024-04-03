@@ -19,7 +19,8 @@ async function loadPlace() {
 }
 
 const props = defineProps<{
-  latLngTuple: [number, number] | null
+  latLngTuple: [number, number] | null,
+  onNewStoryCreated: Function,
 }>();
 
 watchEffect(() => {

@@ -65,7 +65,7 @@ export default defineComponent({
 
 <template>
   <v-sheet id="sheet">
-    <v-text-field v-model="localSearchQuery" label="Search..." color="primary" @input="performSearch()"></v-text-field>
+    <v-text-field append-inner-icon="mdi-map-search" v-model="localSearchQuery" label="Search..." color="primary" @input="performSearch()"></v-text-field>
     <v-card>
       <v-tabs
           v-model="tab"

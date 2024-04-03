@@ -13,7 +13,10 @@
           :open-story-point="onStorySelected"/>
     </div>
     <div class="map-overlay">
-      <PlaceDescription id="placeDesc" :lat-lng-tuple="searchMarkerLocation" :on-open-place="()=> {}" />
+      <PlaceDescription
+          id="placeDesc"
+          :lat-lng-tuple="searchMarkerLocation"
+          :on-new-story-created="() => {searchMarkerLocation = null}" />
     </div>
     <div :hidden="editorHidden" class="filled-map-overlay">
       <StoryPointEditor
