@@ -1,69 +1,69 @@
 <script lang="ts">
-import {defineComponent, ref} from 'vue'
-import {MdEditor} from "md-editor-v3";
-import 'md-editor-v3/lib/style.css';
-import {DataProvider} from "@/dataProvider";
-import type {historyItem, unixTimestamp} from "@/types";
-import DocumentViewer from "@/components/DocumentViewer.vue";
+import { defineComponent, ref } from 'vue'
+import { MdEditor } from 'md-editor-v3'
+import 'md-editor-v3/lib/style.css'
+import { DataProvider } from '@/dataProvider'
+import type { historyItem, unixTimestamp } from '@/types'
+import DocumentViewer from '@/components/DocumentViewer.vue'
 
 export default defineComponent({
-  name: "StoryPointEditor",
-  components: {DocumentViewer, MdEditor},
+  name: 'StoryPointEditor',
+  components: { DocumentViewer, MdEditor },
   title: 'Story Point Editor',
   props: {
     storyPointID: {
       type: String,
-      required: true,
+      required: true
     },
     closeEditor: {
       type: Function,
-      required: true,
+      required: true
     }
   },
   data() {
     return {
       tab: 'one',
-      title: "Story Point Editor",
-      description: ref(""),
+      title: 'Story Point Editor',
+      description: ref(''),
       history: ref([] as historyItem[]),
-      newMessage: "",
+      newMessage: '',
       dialog: false,
       editDialog: false,
       editItem: null as historyItem | null,
-      confirmDeleteDialog: false,
+      confirmDeleteDialog: false
     }
   },
   watch: {
     storyPointID: {
       immediate: true,
-      handler(newVal: string) {
-        this.resetValues();
-        this.initStoryPointEditor();
+      handler() {
+        this.resetValues()
+        this.initStoryPointEditor()
       }
-    },
+    }
   },
   methods: {
     resetValues() {
-      this.title = "";
-      this.description = "";
-      this.history = [];
-      this.newMessage = "";
-      this.dialog = false;
-      this.editDialog = false;
-      this.editItem = null as historyItem | null;
-      this.confirmDeleteDialog = false;
+      this.title = ''
+      this.description = ''
+      this.history = []
+      this.newMessage = ''
+      this.dialog = false
+      this.editDialog = false
+      this.editItem = null as historyItem | null
+      this.confirmDeleteDialog = false
     },
     async initStoryPointEditor() {
-      if (this.storyPointID === "" || this.storyPointID === undefined) return;
-      let storyPoint = await DataProvider.getInstance().getEntireStoryPoint(this.storyPointID);
-      this.title = storyPoint?.title ?? "Error fetching title";
-      this.description = storyPoint?.description ?? "Error fetching description";
+      if (this.storyPointID === '' || this.storyPointID === undefined) return
+      let storyPoint = await DataProvider.getInstance().getEntireStoryPoint(this.storyPointID)
+      this.title = storyPoint?.title ?? 'Error fetching title'
+      this.description = storyPoint?.description ?? 'Error fetching description'
       this.history = storyPoint?.history ?? []
-      this.history = this.history.sort((a, b) => b.created_at - a.created_at);
+      this.history = this.history.sort((a, b) => b.created_at - a.created_at)
     },
     async saveAndExit() {
-      this.newMessage = this.newMessage.trim();
-      if (this.newMessage !== "") {
+      this.newMessage = this.newMessage.trim()
+      if (this.newMessage !== '') {
         this.history.push({
           user_fullname: DataProvider.getInstance().userData.fullname.value,
           created_at: Math.floor(Date.now() / 1000),
@@ -77,35 +77,35 @@ export default defineComponent({
         title: this.title,
         description: this.description,
         history: this.history
-      });
-      this.resetValues();
+      })
+      this.resetValues()
 
-      this.closeEditor();
+      this.closeEditor()
     },
     async deleteStoryPoint() {
-      this.confirmDeleteDialog = true;
+      this.confirmDeleteDialog = true
     },
     async confirmDelete() {
-      await DataProvider.getInstance().deleteStoryPoint(this.storyPointID);
-      this.closeEditor();
+      await DataProvider.getInstance().deleteStoryPoint(this.storyPointID)
+      this.closeEditor()
     },
 
     unixTimeToDate(unixTime: unixTimestamp) {
-      return new Date(unixTime * 1000).toLocaleString();
+      return new Date(unixTime * 1000).toLocaleString()
     },
     deleteHistoryItem(item: historyItem) {
-      this.history = this.history.filter((historyItem) => historyItem !== item);
+      this.history = this.history.filter((historyItem) => historyItem !== item)
     },
     editHistoryContend(item: historyItem) {
-      this.editItem = item;
-      this.editDialog = true;
+      this.editItem = item
+      this.editDialog = true
     },
     saveEditedHistory() {
       if (this.editItem) {
-        this.editItem.edited = true;
+        this.editItem.edited = true
       }
-      this.editDialog = false;
-    },
+      this.editDialog = false
+    }
   }
 })
 </script>
@@ -123,7 +123,12 @@ export default defineComponent({
                 <span class="text-h5">Edit title</span>
               </v-card-title>
               <v-card-text>
-                <v-text-field v-model="title" label="Edit title" single-line autofocus></v-text-field>
+                <v-text-field
+                  v-model="title"
+                  label="Edit title"
+                  single-line
+                  autofocus
+                ></v-text-field>
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
@@ -139,10 +144,7 @@ export default defineComponent({
         <v-btn @click="saveAndExit" color="primary">save</v-btn>
       </v-col>
     </v-row>
-    <v-tabs
-        v-model="tab"
-        bg-color="primary"
-    >
+    <v-tabs v-model="tab" bg-color="primary">
       <v-tab value="one">Description</v-tab>
       <v-tab value="two">history</v-tab>
       <v-tab value="four">Documents</v-tab>
@@ -151,16 +153,35 @@ export default defineComponent({
     <v-card-text>
       <v-window v-model="tab">
         <v-window-item value="one">
-          <MdEditor style="height: 75vh" v-model="description" language="en-US" preview-theme="vuepress"/>
+          <MdEditor
+            style="height: 75vh"
+            v-model="description"
+            language="en-US"
+            preview-theme="vuepress"
+          />
         </v-window-item>
         <v-window-item style="height: 75vh" value="two">
           <div class="scrollable-list">
             <v-list>
-              <v-list-item class="list-item" v-for="historyPoint in history" :key="historyPoint.created_at">
-                <v-row >
+              <v-list-item
+                class="list-item"
+                v-for="historyPoint in history"
+                :key="historyPoint.created_at"
+              >
+                <v-row>
                   <v-col>
-                    <v-list-item-title>{{ historyPoint.user_fullname }} <small>{{unixTimeToDate(historyPoint.created_at)}}</small></v-list-item-title>
-                    <v-list-item-media class="list-item-media">{{ historyPoint.text }} <small><i>{{historyPoint.edited? "edited":""}}</i></small></v-list-item-media>
+                    <v-list-item-title
+                      >{{ historyPoint.user_fullname }}
+                      <small>{{
+                        unixTimeToDate(historyPoint.created_at)
+                      }}</small></v-list-item-title
+                    >
+                    <v-list-item-media class="list-item-media"
+                      >{{ historyPoint.text }}
+                      <small
+                        ><i>{{ historyPoint.edited ? 'edited' : '' }}</i></small
+                      ></v-list-item-media
+                    >
                   </v-col>
                   <v-col cols="2">
                     <v-list-item-action class="items-end">
@@ -169,28 +190,25 @@ export default defineComponent({
                     </v-list-item-action>
                   </v-col>
                 </v-row>
-
               </v-list-item>
             </v-list>
             <v-textarea
-                v-model="newMessage"
-                label="Add new message (Upload with save button)"
-                auto-grow
+              v-model="newMessage"
+              label="Add new message (Upload with save button)"
+              auto-grow
             />
           </div>
           <v-btn color="primary">Send</v-btn>
         </v-window-item>
         <v-window-item style="height: 75vh" value="four">
-          <DocumentViewer :story-point-i-d="storyPointID"/>
+          <DocumentViewer :story-point-i-d="storyPointID" />
         </v-window-item>
       </v-window>
     </v-card-text>
   </v-card>
   <v-dialog v-model="editDialog" max-height="50vh" max-width="70vw">
     <v-card>
-      <v-card-title>
-        Edit message content
-      </v-card-title>
+      <v-card-title> Edit message content </v-card-title>
       <v-card-text>
         <v-textarea v-model="editItem!.text" label="Edit content" autofocus></v-textarea>
       </v-card-text>
@@ -216,7 +234,6 @@ export default defineComponent({
 .items-end {
   display: flex;
   justify-content: flex-end;
-
 }
 .items-end * {
   margin: 8px 8px 8px 0;

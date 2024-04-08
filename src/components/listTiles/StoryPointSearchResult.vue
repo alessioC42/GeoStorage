@@ -1,20 +1,24 @@
 <script setup lang="ts">
-
-import type {storyPoint} from "@/types";
+import type { storyPoint } from '@/types'
 
 const props = defineProps<{
-  onPress: Function,
-  storyPoint: storyPoint
-}>();
-
+  onPress: Function
+  selectedStoryPoint: storyPoint
+}>()
 </script>
 
 <template>
   <v-list-item
-      @click="(_) => {props.onPress(props.storyPoint);}"
+    @click="
+      (_) => {
+        props.onPress(props.selectedStoryPoint)
+      }
+    "
   >
-    <v-list-item-title>{{ storyPoint.title }}</v-list-item-title>
-    <v-list-item-subtitle class="clamp-description">{{ storyPoint.description ?? storyPoint.coords }}</v-list-item-subtitle>
+    <v-list-item-title>{{ selectedStoryPoint.title }}</v-list-item-title>
+    <v-list-item-subtitle class="clamp-description">{{
+      selectedStoryPoint.description ?? selectedStoryPoint.coords
+    }}</v-list-item-subtitle>
   </v-list-item>
 </template>
 

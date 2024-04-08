@@ -1,18 +1,14 @@
 <script lang="ts">
-
-import {defineComponent, ref} from "vue";
-import IconStoryPoint from "@/components/icons/IconStoryPoint.vue";
-import IconMainAppIcon from "@/components/icons/IconMainAppIcon.vue";
-import {DataProvider} from "@/dataProvider";
+import { defineComponent, ref } from 'vue'
+import { DataProvider } from '@/dataProvider'
 
 export default defineComponent({
   name: 'LoginScreen',
-  components: {IconMainAppIcon, IconStoryPoint},
   props: {
-    id: String,
+    id: String
   },
   setup() {
-    DataProvider.getInstance().firstAuthCheck();
+    DataProvider.getInstance().firstAuthCheck()
     return {
       username: ref(''),
       password: ref(''),
@@ -23,27 +19,30 @@ export default defineComponent({
   },
   methods: {
     async authenticate() {
-      const [loginStatusText, loginSuccessful] = await DataProvider.getInstance().authenticate(this.username, this.password);
-      this.loginSuccessful = loginSuccessful;
-      this.loginStatusText = loginStatusText;
+      const [loginStatusText, loginSuccessful] = await DataProvider.getInstance().authenticate(
+        this.username,
+        this.password
+      )
+      this.loginSuccessful = loginSuccessful
+      this.loginStatusText = loginStatusText
 
       if (!this.loginSuccessful) {
-        this.dialog = true;
+        this.dialog = true
       }
-      await DataProvider.getInstance().isAuthenticated();
+      await DataProvider.getInstance().isAuthenticated()
     }
   }
-});
-
+})
 </script>
 
 <template>
-  <div class="appicon">
-    GeoStorage
-  </div>
+  <div class="appicon">GeoStorage</div>
   <v-sheet id="sheet">
     <v-card-title>Login</v-card-title>
-    <v-card-text class="grey">Use the credentials provided by your company to authenticate on GeoStorage. Contact your organisation Administrator if you have lost your credentials.</v-card-text>
+    <v-card-text class="grey"
+      >Use the credentials provided by your company to authenticate on GeoStorage. Contact your
+      organisation Administrator if you have lost your credentials.</v-card-text
+    >
     <v-text-field v-model="username" label="Email" type="email"></v-text-field>
     <v-text-field v-model="password" label="Password" type="password"></v-text-field>
     <v-btn @click="authenticate">Login</v-btn>

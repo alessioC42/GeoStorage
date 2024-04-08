@@ -1,21 +1,24 @@
 <script setup lang="ts">
-
-
-import type {OsmSearchResult} from "@/types";
+import type { OsmSearchResult } from '@/types'
 
 const props = defineProps<{
-  onPress: Function,
+  onPress: Function
   osmSearchResult: OsmSearchResult
-}>();
-
+}>()
 </script>
 
 <template>
   <v-list-item
-      @click="(_) => {props.onPress(props.osmSearchResult);}"
+    @click="
+      (_) => {
+        props.onPress(props.osmSearchResult)
+      }
+    "
   >
     <v-list-item-title>{{ osmSearchResult.display_name }}</v-list-item-title>
-    <v-list-item-subtitle>{{ osmSearchResult.category }} {{osmSearchResult.type}}</v-list-item-subtitle>
+    <v-list-item-subtitle
+      >{{ osmSearchResult.category }} {{ osmSearchResult.type }}</v-list-item-subtitle
+    >
   </v-list-item>
 </template>
 
